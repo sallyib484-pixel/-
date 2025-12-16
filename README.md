@@ -1,45 +1,64 @@
-def caesar_encrypt(plaintext, key):
+n = 26
 
+def char_to_int(char):
+    """تحويل الحرف الإنجليزي الكبير إلى قيمة عددية (0=A, 25=Z)."""
+    return ord(char) - ord('A')
+
+def int_to_char(integer):
+    """تحويل القيمة العددية إلى حرف إنجليزي كبير."""
+    return chr(integer + ord('A'))
+
+def autokey_encrypt(plaintext, key):
+  
+    if len(key) != 1 or not key.isalpha():
+        raise ValueError("المفتاح الأولي يجب أن يكون حرفاً واحداً.")
+    
+    # تحويل المفتاح الأولي إلى قيمة عددية (k0)
+    key_stream = [char_to_int(key.upper())]
     ciphertext = ""
+    
+
     for char in plaintext:
         if 'A' <= char <= 'Z':
-      
-            char_index = ord(char) - ord('A')
-          
-            new_index = (char_index + key) % 26
-          
-            new_char = chr(new_index + ord('A'))
-            ciphertext += new_char
-        else:
-            ciphertext += char
+            P = char_to_int(char)
+        
+            key_stream.append(P)
+            
+           
+            k_i = key_stream.pop(0) 
+            
+            # تطبيق صيغة التشفير: C = (P + k_i) mod 26
+            C = (P + k_i) % n
+            
+            ciphertext += int_to_char(C)
+            
     return ciphertext
 
-def caesar_decrypt(ciphertext, key):
+def autokey_decrypt(ciphertext, key):
 
+    if len(key) != 1 or not key.isalpha():
+        raise ValueError("المفتاح الأولي يجب أن يكون حرفاً واحداً.")
+
+    # تحويل المفتاح الأولي إلى قيمة عددية (k0)
+    key_stream = [char_to_int(key.upper())]
     plaintext = ""
+    
     for char in ciphertext:
         if 'A' <= char <= 'Z':
-
-            char_index = ord(char) - ord('A')
-            new_index = (char_index - key + 26) % 26
-           
-            new_char = chr(new_index + ord('A'))
-            plaintext += new_char
-        else:
-            plaintext += char
+            C = char_to_int(char)
+            
+            # المفتاح الحالي هو العنصر الأخير الذي تمت إضافته إلى key_stream
+            k_i = key_stream.pop(0)
+            
+            # تطبيق صيغة فك التشفير: P = (C - k_i) mod 26
+            a = C - k_i
+            if a<0 :
+               a = (n - abc(a)) % n
+            P = (a) % n
+            
+            plaintext_char = int_to_char(P)
+            plaintext += plaintext_char
+            
+            # إضافة النص الأصلي المفكوك (P) إلى تيار المفاتيح لاستخدامه في فك التشفير التالي
+            key_stream.append(P)
     return plaintext
-
-
-
-def caesar_bruteforce_attack(ciphertext):
-
-    possible_plaintexts = {}
-    print("--- (Brute-Force) ---")
-    
-    # تجربة جميع المفاتيح الممكنة
-    for key in range(1, 26):
-        decrypted_text = caesar_decrypt(ciphertext, key)
-        possible_plaintexts[key] = decrypted_text
-        print(f"المفتاح {key}: {decrypted_text}")
-        
-    #هنا نأخذ الفمتاح الذي نتج عنه كلمة ذات معنى# -
